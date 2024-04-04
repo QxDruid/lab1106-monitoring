@@ -48,4 +48,22 @@
       - /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
 
+- name: Install Grafana
+  hosts: prometheus
+  become: yes
+  tasks:
 
+  - name: Create Grafana docker volume
+    community.docker.docker_volume:
+      name: grafana_storage
+      state: present
+
+  - name: Start Grafana container
+    community.docker.docker_container:
+      name: grafana
+      image: grafana/grafana
+      state: started
+      ports:
+      - "3000:3000"
+      volumes:
+      - grafana_storage:/var/lib/grafana
