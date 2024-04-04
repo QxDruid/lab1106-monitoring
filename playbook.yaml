@@ -1,4 +1,15 @@
 ---
+- name: Install Docker
+  hosts: prometheus
+  become: yes
+  tasks:
+        
+  - name: Install Docker
+    ansible.builtin.apt:
+      name: [docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
+      state: latest
+
+
 - name: Install Prometheus
   hosts: prometheus
   become: yes
@@ -17,22 +28,6 @@
       src: ./prometheus_config.j2
       dest: /etc/prometheus/prometheus.yml
       mode: u=rw,g=r,o=r
-
-
-  - name: show Config
-    ansible.builtin.command: cat /etc/prometheus/prometheus.yml
-    register: cat_output
-
-
-  - name: Print to console
-    debug:
-      msg: "{{cat_output.stdout}}"
-
-    
-  - name: Install Docker
-    ansible.builtin.apt:
-      name: [docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
-      state: latest
 
   - name: Create a volume
     community.docker.docker_volume:
