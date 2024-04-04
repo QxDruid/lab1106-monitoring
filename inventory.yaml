@@ -1,0 +1,8 @@
+---
+prometheus:
+  hosts:
+    192.168.10.100
+  vars:
+    ansible_port: 2233
+    ansible_user: imdruid
+    ansible_ssh_private_key_file: /home/imdruid/.ssh/local

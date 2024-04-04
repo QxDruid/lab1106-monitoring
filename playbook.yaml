@@ -1,0 +1,56 @@
+---
+- name: Install Prometheus
+  hosts: prometheus
+  become: yes
+  vars_files:
+    - ./vars/node_exporters.yaml
+  tasks:
+  
+  - name: Create config folder
+    ansible.builtin.file:
+      path: /etc/prometheus
+      state: directory
+      mode: '0755'
+
+  - name: Create Prometheus config
+    ansible.builtin.template:
+      src: ./prometheus_config.j2
+      dest: /etc/prometheus/prometheus.yml
+      mode: u=rw,g=r,o=r
+
+
+  - name: show Config
+    ansible.builtin.command: cat /etc/prometheus/prometheus.yml
+    register: cat_output
+
+
+  - name: Print to console
+    debug:
+      msg: "{{cat_output.stdout}}"
+
+    
+  - name: Install Docker
+    ansible.builtin.apt:
+      name: [docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
+      state: latest
+
+  - name: Create a volume
+    community.docker.docker_volume:
+      name: prometheus_data
+      state: present
+
+  - name: Start Prometheus container
+    community.docker.docker_container:
+      name: prometheus
+
+      image: prom/prometheus
+      state: started
+      ports:
+      - "9090:9090"
+
+      volumes:
+      - prometheus_data:/prometheus
+      - /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+
+
